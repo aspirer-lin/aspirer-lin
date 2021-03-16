@@ -20,24 +20,21 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="bridge：网桥，Linux中用于表示一个能连接不同网络设备的虚拟设备，linux中传统实现的网桥类似一个hub设备，而ovs管理的网桥一般类似交换机。 br-int：综合网桥，常用于表示实现主要内部网络功能的网桥。 br-ex：外部网桥，通常表示负责跟外部网络通信的网桥。 br-tun：根据 OpenFlow 规则将 VLAN 标记的流量从集成网桥转换为隧道 ID。隧道桥允许不同网络的实例彼">
+  <meta name="description" content="本调研基于openstack q版本编写 【kolla介绍】kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。 【kolla特性】  支持所有服务的高可用； 支持ceph做后端存储，glance&#x2F;nova&#x2F;cinder&#x2F;gnocchi； 支持多个Linux发行版，Centos&#x2F;OracleLinux&#x2F;Ubuntu&#x2F;RHEL； 同时支持源码安装">
 <meta property="og:type" content="article">
-<meta property="og:title" content="openstack网络拓扑">
-<meta property="og:url" content="http://example.com/2021/03/16/4/index.html">
+<meta property="og:title" content="openstack kolla项目调研">
+<meta property="og:url" content="http://example.com/2021/03/16/6/index.html">
 <meta property="og:site_name" content="Aspirer Lin">
-<meta property="og:description" content="bridge：网桥，Linux中用于表示一个能连接不同网络设备的虚拟设备，linux中传统实现的网桥类似一个hub设备，而ovs管理的网桥一般类似交换机。 br-int：综合网桥，常用于表示实现主要内部网络功能的网桥。 br-ex：外部网桥，通常表示负责跟外部网络通信的网桥。 br-tun：根据 OpenFlow 规则将 VLAN 标记的流量从集成网桥转换为隧道 ID。隧道桥允许不同网络的实例彼">
+<meta property="og:description" content="本调研基于openstack q版本编写 【kolla介绍】kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。 【kolla特性】  支持所有服务的高可用； 支持ceph做后端存储，glance&#x2F;nova&#x2F;cinder&#x2F;gnocchi； 支持多个Linux发行版，Centos&#x2F;OracleLinux&#x2F;Ubuntu&#x2F;RHEL； 同时支持源码安装">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/03/16/4/image2.png">
-<meta property="article:published_time" content="2021-03-16T07:30:17.000Z">
-<meta property="article:modified_time" content="2021-03-16T08:30:52.635Z">
+<meta property="article:published_time" content="2021-03-16T08:28:41.000Z">
+<meta property="article:modified_time" content="2021-03-16T08:52:57.177Z">
 <meta property="article:author" content="Lin">
-<meta property="article:tag" content="neutron">
-<meta property="article:tag" content="openvswitch">
 <meta property="article:tag" content="openstack">
+<meta property="article:tag" content="kolla">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/03/16/4/image2.png">
 
-<link rel="canonical" href="http://example.com/2021/03/16/4/">
+<link rel="canonical" href="http://example.com/2021/03/16/6/">
 
 
 <script id="page-configurations">
@@ -50,7 +47,7 @@
   };
 </script>
 
-  <title>openstack网络拓扑 | Aspirer Lin</title>
+  <title>openstack kolla项目调研 | Aspirer Lin</title>
   
 
 
@@ -165,7 +162,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/4/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -178,7 +175,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          openstack网络拓扑
+          openstack kolla项目调研
         </h1>
 
         <div class="post-meta">
@@ -189,7 +186,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-16 15:30:17 / 修改时间：16:30:52" itemprop="dateCreated datePublished" datetime="2021-03-16T15:30:17+08:00">2021-03-16</time>
+              <time title="创建时间：2021-03-16 16:28:41 / 修改时间：16:52:57" itemprop="dateCreated datePublished" datetime="2021-03-16T16:28:41+08:00">2021-03-16</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -197,11 +194,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                  <a href="/categories/kolla/" itemprop="url" rel="index"><span itemprop="name">kolla</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%BD%91%E7%BB%9C/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                  <a href="/categories/kolla/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
                 </span>
             </span>
 
@@ -216,27 +213,42 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <ul>
-<li>bridge：网桥，Linux中用于表示一个能连接不同网络设备的虚拟设备，linux中传统实现的网桥类似一个hub设备，而ovs管理的网桥一般类似交换机。</li>
-<li>br-int：综合网桥，常用于表示实现主要内部网络功能的网桥。</li>
-<li>br-ex：外部网桥，通常表示负责跟外部网络通信的网桥。</li>
-<li>br-tun：根据 OpenFlow 规则将 VLAN 标记的流量从集成网桥转换为隧道 ID。隧道桥允许不同网络的实例彼此进行通信。隧道有利于封装在非安全网络上传输的流量，它支持两层网络，即 GRE 和 VXLAN。</li>
-<li>GRE：一种通过封装来实现隧道的方式。在openstack中一般是基于L3的gre，即original pkt/GRE/IP/Ethernet</li>
-<li>VETH：虚拟ethernet接口，通常以pair的方式出现，一端发出的网包，会被另一端接收，可以形成两个网桥之间的通道。</li>
-<li>qvb：q:quantum以前neutron的名字，遗留名字； veth； Linux Bridge-side</li>
-<li>qvo：q:quantum以前neutron的名字，遗留名字； veth；OVS-side</li>
-<li>qbr：一个Linux Bridge，很是奇怪，我们在这个架构中，使用的OpenvSwitch实现虚拟交换设备的，为什么会出现Linux Bridge呢？OpenvSwitch不支持现在的OpenStack的实现方式,因为OpenStack是把iptables规则丢在TAP设备中，以此实现了安全组功能。没办法，所以用了一个折衷的方式，在中间加一层，用Linux Bridge来实现吧，这样，就莫名其妙了多了一个qbr网桥。在qbr上面还存在另一个设备C，这也是一个TAP设备。C通常以qvb开头，C和br-int上的D连接在一起，形成一个连接通道，使得qbr和br-int之间顺畅通信</li>
-<li>qr：L3 agent managed port 是router端的port</li>
-<li>qg：L3 agent managed port 是gateway端的port</li>
-<li>TAP设备：模拟一个二层的网络设备，可以接受和发送二层网包。</li>
-<li>TUN设备：模拟一个三层的网络设备，可以接受和发送三层网包。</li>
-<li>iptables：Linux 上常见的实现安全策略的防火墙软件。</li>
-<li>Vlan：虚拟 Lan，同一个物理 Lan 下用标签实现隔离，可用标号为1-4094。</li>
-<li>VXLAN：一套利用 UDP 协议作为底层传输协议的 Overlay 实现。一般认为作为 VLan 技术的延伸或替代者。</li>
-<li>namespace：用来实现隔离的一套机制，不同 namespace 中的资源之间彼此不可见。</li>
+        <p>本调研基于openstack q版本编写</p>
+<p>【kolla介绍】<br>kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。</p>
+<p>【kolla特性】</p>
+<ul>
+<li>支持所有服务的高可用；</li>
+<li>支持ceph做后端存储，glance/nova/cinder/gnocchi；</li>
+<li>支持多个Linux发行版，Centos/OracleLinux/Ubuntu/RHEL；</li>
+<li>同时支持源码安装和二进制包安装；</li>
+<li>物理机上只依赖Docker Engine和docker；</li>
+<li>支持原子升级。<span id="more"></span></li>
 </ul>
-<span id="more"></span>
-<img src="/2021/03/16/4/image2.png" class>
+<p>制作openstack容器镜像会用到一些依赖包，需要在本地制作yum源，这里就不介绍怎么制作了。嫌制作慢的推荐可以去研究下。</p>
+<p>从openstack官方下载kolla项目<a target="_blank" rel="noopener" href="https://github.com/openstack/kolla/archive/stable/queens.zip">https://github.com/openstack/kolla/archive/stable/queens.zip</a>  下载Queens版本的kolla</p>
+<p>配置yum仓库添加阿里镜像稳定版仓库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
+<p>添加阿里源时有时会报错，如果报错，使用如下命令使用官方源</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除异常源</span></span><br><span class="line">sudo rm -f /etc/yum.repos.d/docker-ce.repo</span><br><span class="line"><span class="comment">#使用官方源</span></span><br><span class="line">sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
+
+<p>准备kolla需要的基础环境</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install python-pip python-devel libffi-devel gcc openssl-devel libselinux-python vim git wget -y</span><br></pre></td></tr></table></figure>
+<p>安装docker ce</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker-ce -y</span><br></pre></td></tr></table></figure>
+<p>开启docker的共享挂载功能：所谓共享挂载即同一个目录或设备可以挂载到多个不同的路径并且能够保持互相之间的共享可见性<br>类似于 mount –shared。在 OpenStack for Kolla 中，主要解决 Neutron 的 namespace 在不同 container 中得以保持实效性的问题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/systemd/system/docker.service.d</span><br><span class="line">tee /etc/systemd/system/docker.service.d/kolla.conf &lt;&lt; <span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">[Service]</span><br><span class="line">MountFlags=shared</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>配置阿里云的docker加速器，加快pull registry镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /etc/docker</span><br><span class="line">tee /etc/docker/daemon.json &lt;&lt;-<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://a5aghnme.mirror.aliyuncs.com&quot;</span>]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>重启docker相关服务和设置docker开机自启</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload &amp;&amp; systemctl <span class="built_in">enable</span> docker &amp;&amp; systemctl restart docker</span><br></pre></td></tr></table></figure>
+<p>准备python基础环境</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install -U tox docker jinja2 --ignore-installed requests -i https://pypi.tuna.tsinghua.edu.cn/simple</span><br><span class="line">pip install pip==20.3.3 -i https://pypi.tuna.tsinghua.edu.cn/simple</span><br></pre></td></tr></table></figure>
+<p>把前面下载的Queens版本的kolla代码解压到任意目录，我这里放到了/root目录下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /root/kolla</span><br><span class="line">pip install -r requirements.txt --ignore-installed PyYAML -i https://pypi.tuna.tsinghua.edu.cn/simple -e .</span><br><span class="line">pip install -r test-requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple -e .</span><br></pre></td></tr></table></figure>
+<p>拷贝kolla-build.conf到/etc/kolla/目录下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/kolla</span><br><span class="line">cp /root/kolla/etc/kolla/kolla-build.conf /etc/kolla/</span><br></pre></td></tr></table></figure>
+<p>制作visionstack需要的基础docker镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一次制作少点镜像，制作多了机器会挂。</span></span><br><span class="line">kolla-build kolla-toolbox chrony cron fluentd glance horizon</span><br><span class="line">kolla-build keystone mariadb memcached influxdb neutron</span><br><span class="line">kolla-build nova-</span><br><span class="line">kolla-build openvswitch rabbitmq</span><br><span class="line">kolla-build senlin sqlants friedrice turtle hearkener qyapi</span><br><span class="line">kolla-build vs-log-collecter vs-monitor-agent cinder ceph</span><br><span class="line">kolla-build haproxy keepalived</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -246,9 +258,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/neutron/" rel="tag"># neutron</a>
-              <a href="/tags/openvswitch/" rel="tag"># openvswitch</a>
               <a href="/tags/openstack/" rel="tag"># openstack</a>
+              <a href="/tags/kolla/" rel="tag"># kolla</a>
           </div>
 
         
@@ -257,12 +268,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/03/16/3/" rel="prev" title="私有云交换机平面">
-      <i class="fa fa-chevron-left"></i> 私有云交换机平面
+    <a href="/2021/03/16/5/" rel="prev" title="openstack分布式虚拟路由">
+      <i class="fa fa-chevron-left"></i> openstack分布式虚拟路由
     </a></div>
       <div class="post-nav-item">
-    <a href="/2021/03/16/5/" rel="next" title="openstack分布式虚拟路由">
-      openstack分布式虚拟路由 <i class="fa fa-chevron-right"></i>
+    <a href="/2021/03/16/7/" rel="next" title="openstack kolla-ansible项目调研">
+      openstack kolla-ansible项目调研 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>

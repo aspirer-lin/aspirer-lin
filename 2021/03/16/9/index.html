@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="nova镜像缓存机制当前云主机的系统盘有两种存储模式：    1) 本地file存储，系统盘保存在对应宿主机的磁盘上；    2）ceph存储，系统盘保存在对应的ceph pool中。 某些上层用户（例如RDS）对系统盘的IO有较高的要求，因此系统盘会采用本地file存储的形式。在目前的网络条件下，从glance服务器上下载基础镜像到计算节点会花费较多的时间，所以nova中对于镜像的处理策略是：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openstack镜像预热调研">
+<meta property="og:url" content="http://example.com/2021/03/16/9/index.html">
+<meta property="og:site_name" content="Aspirer Lin">
+<meta property="og:description" content="nova镜像缓存机制当前云主机的系统盘有两种存储模式：    1) 本地file存储，系统盘保存在对应宿主机的磁盘上；    2）ceph存储，系统盘保存在对应的ceph pool中。 某些上层用户（例如RDS）对系统盘的IO有较高的要求，因此系统盘会采用本地file存储的形式。在目前的网络条件下，从glance服务器上下载基础镜像到计算节点会花费较多的时间，所以nova中对于镜像的处理策略是：">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-16T09:19:54.000Z">
+<meta property="article:modified_time" content="2021-03-16T09:24:57.963Z">
+<meta property="article:author" content="Lin">
+<meta property="article:tag" content="openstack">
+<meta property="article:tag" content="glance">
+<meta property="article:tag" content="nova">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/03/16/9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>openstack镜像预热调研 | Aspirer Lin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Aspirer Lin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          openstack镜像预热调研
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-16 17:19:54 / 修改时间：17:24:57" itemprop="dateCreated datePublished" datetime="2021-03-16T17:19:54+08:00">2021-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/glance/" itemprop="url" rel="index"><span itemprop="name">glance</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/glance/nova/" itemprop="url" rel="index"><span itemprop="name">nova</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="nova镜像缓存机制"><a href="#nova镜像缓存机制" class="headerlink" title="nova镜像缓存机制"></a>nova镜像缓存机制</h3><p>当前云主机的系统盘有两种存储模式：<br>    1) 本地file存储，系统盘保存在对应宿主机的磁盘上；<br>    2）ceph存储，系统盘保存在对应的ceph pool中。</p>
+<p>某些上层用户（例如RDS）对系统盘的IO有较高的要求，因此系统盘会采用本地file存储的形式。在目前的网络条件下，从glance服务器上下载基础镜像到计算节点会花费较多的时间，所以nova中对于镜像的处理策略是：</p>
+<p>如果_base目录下有该镜像，创建虚拟机时，先根据镜像创建快照，然后再启动快照。如果_base目录下无该镜像，则先拷贝镜像到_base目录下，然后根据镜像创建快照，最后再启动快照。所以一般第一次启动虚拟机比较慢，后面启动就会很快。</p>
+<p>镜像从glance服务器上下载到计算节点上的_base目录做为基础镜像的缓存，其命名格式为image_id的sha1 hash形式，同时会将基础镜像格式转换为raw (RAW Image Format)。如果镜像支持CoW (copy-on-write)，那么就会将镜像变为实例配置的大小，如果不支持CoW，就直接将镜像拷贝到实例对应的目录中。</p>
+<span id="more"></span>
+<p>其中镜像缓存保存的目录是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/lib/nova/instances/_base/</span><br></pre></td></tr></table></figure>
+<p>镜像缓存名称示例生成代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;env python</span><br><span class="line">import hashlib</span><br><span class="line">image_id &#x3D; &quot;67b67b36-0e07-4f6d-98d3-ed0057e9f87d&quot; #基础镜像id</span><br><span class="line">base_image_name &#x3D; hashlib.sha1(image_id).hexdigest() #base镜像的名称为基础镜像id的hash</span><br></pre></td></tr></table></figure>
+<p>转换镜像缓存格式为raw（如果基础镜像不是raw格式的话）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ qemu-img convert -O raw 源文件 目标文件</span><br></pre></td></tr></table></figure>
+<p>nova中镜像缓存、格式转换代码逻辑</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nova.virt.images.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fetch_to_raw</span>(<span class="params">context, image_href, path, user_id, project_id, max_size=<span class="number">0</span></span>):</span></span><br><span class="line">    <span class="comment"># image_href：镜像id</span></span><br><span class="line">    <span class="comment"># path：镜像缓存保存的路径，示例/var/lib/nova/instances/_base/01c57ef9f47a8642e2093cc007476a5a0bc849d2</span></span><br><span class="line">    <span class="comment"># 从glance上下载镜像，保存为.part后缀的文件</span></span><br><span class="line">    path_tmp = <span class="string">&quot;%s.part&quot;</span> % path</span><br><span class="line">    fetch(context, image_href, path_tmp, user_id, project_id,</span><br><span class="line">          max_size=max_size)</span><br><span class="line">    <span class="keyword">with</span> fileutils.remove_path_on_error(path_tmp):</span><br><span class="line">        <span class="comment"># 通过执行qemu-img info命令获取镜像信息</span></span><br><span class="line">        data = qemu_img_info(path_tmp)</span><br><span class="line">        fmt = data.file_format</span><br><span class="line">        <span class="keyword">if</span> fmt <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> exception.ImageUnacceptable(</span><br><span class="line">                reason=_(<span class="string">&quot;&#x27;qemu-img info&#x27; parsing failed.&quot;</span>),</span><br><span class="line">                image_id=image_href)</span><br><span class="line">        backing_file = data.backing_file</span><br><span class="line">        <span class="keyword">if</span> backing_file <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> exception.ImageUnacceptable(image_id=image_href,</span><br><span class="line">                reason=(_(<span class="string">&quot;fmt=%(fmt)s backed by: %(backing_file)s&quot;</span>) %</span><br><span class="line">                        &#123;<span class="string">&#x27;fmt&#x27;</span>: fmt, <span class="string">&#x27;backing_file&#x27;</span>: backing_file&#125;))</span><br><span class="line">        <span class="comment"># We can&#x27;t generally shrink incoming images, so disallow</span></span><br><span class="line">        <span class="comment"># images &gt; size of the flavor we&#x27;re booting.  Checking here avoids</span></span><br><span class="line">        <span class="comment"># an immediate DoS where we convert large qcow images to raw</span></span><br><span class="line">        <span class="comment"># (which may compress well but not be sparse).</span></span><br><span class="line">        <span class="comment"># TODO(p-draigbrady): loop through all flavor sizes, so that</span></span><br><span class="line">        <span class="comment"># we might continue here and not discard the download.</span></span><br><span class="line">        <span class="comment"># If we did that we&#x27;d have to do the higher level size checks</span></span><br><span class="line">        <span class="comment"># irrespective of whether the base image was prepared or not.</span></span><br><span class="line">        disk_size = data.virtual_size</span><br><span class="line">        <span class="keyword">if</span> max_size <span class="keyword">and</span> max_size &lt; disk_size:</span><br><span class="line">            msg = _(<span class="string">&#x27;%(base)s virtual size %(disk_size)s &#x27;</span></span><br><span class="line">                    <span class="string">&#x27;larger than flavor root disk size %(size)s&#x27;</span>)</span><br><span class="line">            LOG.error(msg % &#123;<span class="string">&#x27;base&#x27;</span>: path,</span><br><span class="line">                             <span class="string">&#x27;disk_size&#x27;</span>: disk_size,</span><br><span class="line">                             <span class="string">&#x27;size&#x27;</span>: max_size&#125;)</span><br><span class="line">            <span class="keyword">raise</span> exception.InstanceTypeDiskTooSmall()</span><br><span class="line">        <span class="keyword">if</span> fmt != <span class="string">&quot;raw&quot;</span> <span class="keyword">and</span> CONF.force_raw_images:</span><br><span class="line">            staged = <span class="string">&quot;%s.converted&quot;</span> % path</span><br><span class="line">            LOG.debug(<span class="string">&quot;%s was %s, converting to raw&quot;</span> % (image_href, fmt))</span><br><span class="line">            <span class="keyword">with</span> fileutils.remove_path_on_error(staged):</span><br><span class="line">                <span class="comment"># qemu-img convert命令转换为raw格式镜像</span></span><br><span class="line">                convert_image(path_tmp, staged, <span class="string">&#x27;raw&#x27;</span>)</span><br><span class="line">                os.unlink(path_tmp)</span><br><span class="line">                data = qemu_img_info(staged)</span><br><span class="line">                <span class="keyword">if</span> data.file_format != <span class="string">&quot;raw&quot;</span>:</span><br><span class="line">                    <span class="keyword">raise</span> exception.ImageUnacceptable(image_id=image_href,</span><br><span class="line">                        reason=_(<span class="string">&quot;Converted to raw, but format is now %s&quot;</span>) %</span><br><span class="line">                        data.file_format)</span><br><span class="line">                os.rename(staged, path)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            os.rename(path_tmp, path)</span><br></pre></td></tr></table></figure>
+<p>nova镜像缓存过期清理机制<br>nova当中有一个定时任务（默认2400s执行一次）来管理上述缓存的镜像，清理长时间没有使用的镜像。镜像缓存存储时间默认为24 * 3600 秒即一天的时间，默认清除镜像缓存功能可以被关闭。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nova.compute.manager.py</span></span><br><span class="line"><span class="meta">@periodic_task.periodic_task(<span class="params">spacing=CONF.image_cache_manager_interval,</span></span></span><br><span class="line"><span class="meta"><span class="params">                             external_process_ok=<span class="literal">True</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_run_image_cache_manager_pass</span>(<span class="params">self, context</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Run a single pass of the image cache manager.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.driver.capabilities[<span class="string">&quot;has_imagecache&quot;</span>]:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">if</span> CONF.image_cache_manager_interval == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># 检查是否还有其他节点使用这个目录（共享存储的情况下）</span></span><br><span class="line">    <span class="comment"># 在我们目前集群的配置当中，nodes就只包含当前的计算节点</span></span><br><span class="line">    storage_users.register_storage_use(CONF.instances_path, CONF.host)</span><br><span class="line">    nodes = storage_users.get_storage_users(CONF.instances_path)</span><br><span class="line">    <span class="comment"># 查询获取运行在上述nodes上的云主机</span></span><br><span class="line">    filters = &#123;<span class="string">&#x27;deleted&#x27;</span>: <span class="literal">False</span>,</span><br><span class="line">               <span class="string">&#x27;soft_deleted&#x27;</span>: <span class="literal">True</span>,</span><br><span class="line">               <span class="string">&#x27;host&#x27;</span>: nodes&#125;</span><br><span class="line">    filtered_instances = self.conductor_api.instance_get_all_by_filters(</span><br><span class="line">        context, filters, columns_to_join=[])</span><br><span class="line">    <span class="comment"># 调用后端驱动的manage_image_cache来具体管理镜像缓存</span></span><br><span class="line">    self.driver.manage_image_cache(context, filtered_instances)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">结合目前我们集群的配置，可以简单的认为上述代码的作用是，查询出运行在本计算节点上的云主机，然后调用manage_image_cache方法，接着来看下manage_image_cache。</span><br><span class="line"><span class="comment"># nova.virt.libvirt.driver.py</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LibvirtDriver</span>(<span class="params">driver.ComputeDriver</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">manage_image_cache</span>(<span class="params">self, context, all_instances</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;Manage the local cache of images.&quot;&quot;&quot;</span></span><br><span class="line">        self.image_cache_manager.verify_base_images(context, all_instances)</span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">直接调用的是verify_base_images。</span><br><span class="line"><span class="comment"># nova.virt.libvirt.imagecache.py</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ImageCacheManager</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">verify_base_images</span>(<span class="params">self, context, all_instances</span>):</span></span><br><span class="line">        <span class="comment"># 开始先重置几个变量</span></span><br><span class="line">        <span class="comment"># self.used_images = &#123;&#125;</span></span><br><span class="line">        <span class="comment"># self.image_popularity = &#123;&#125;</span></span><br><span class="line">        <span class="comment"># self.instance_names = set()</span></span><br><span class="line">        <span class="comment"># </span></span><br><span class="line">        <span class="comment"># self.active_base_files = []</span></span><br><span class="line">        <span class="comment"># self.corrupt_base_files = []</span></span><br><span class="line">        <span class="comment"># self.originals = []</span></span><br><span class="line">        <span class="comment"># self.removable_base_files = []</span></span><br><span class="line">        <span class="comment"># self.unexplained_images = []</span></span><br><span class="line">        self._reset_state()</span><br><span class="line">        base_dir = os.path.join(CONF.instances_path, CONF.base_dir_name)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(base_dir):</span><br><span class="line">            LOG.debug(_(<span class="string">&#x27;Skipping verification, no base directory at %s&#x27;</span>),</span><br><span class="line">                      base_dir)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        LOG.debug(_(<span class="string">&#x27;Verify base images&#x27;</span>))</span><br><span class="line">        <span class="comment"># 列出_base目录下合法的镜像缓存，有两种合法的镜像：</span></span><br><span class="line">        <span class="comment"># 1）镜像名长度就是sha1 hash长度</span></span><br><span class="line">        <span class="comment"># 2）镜像名是sha1 hash且带下划线（主要是resize过程中镜像名的变化）</span></span><br><span class="line">        <span class="comment"># 上述两种镜像都会保存到unexplained_images变量中，1）同时还会保存到originals变量中</span></span><br><span class="line">        self._list_base_images(base_dir)</span><br><span class="line">        <span class="comment"># 列出所有运行的云主机，并将其使用的镜像保存到used_images变量中</span></span><br><span class="line">        self._list_running_instances(context, all_instances)</span><br><span class="line">        <span class="comment"># Determine what images are on disk because they&#x27;re in use</span></span><br><span class="line">        <span class="keyword">for</span> img <span class="keyword">in</span> self.used_images:</span><br><span class="line">            fingerprint = hashlib.sha1(img).hexdigest()</span><br><span class="line">            LOG.debug(_(<span class="string">&#x27;Image id %(id)s yields fingerprint %(fingerprint)s&#x27;</span>),</span><br><span class="line">                      &#123;<span class="string">&#x27;id&#x27;</span>: img,</span><br><span class="line">                       <span class="string">&#x27;fingerprint&#x27;</span>: fingerprint&#125;)</span><br><span class="line">            <span class="comment"># 根据镜像fingerprint（即sha1 hash值）从_base目录中查询匹配的镜像</span></span><br><span class="line">            <span class="comment"># 会同时包含resize镜像</span></span><br><span class="line">            <span class="keyword">for</span> result <span class="keyword">in</span> self._find_base_file(base_dir, fingerprint):</span><br><span class="line">                base_file, image_small, image_resized = result</span><br><span class="line">                <span class="comment"># _handle_base_image主要完成以下几件事</span></span><br><span class="line">                <span class="comment"># 1)从unexplained_images变量中移除base_file</span></span><br><span class="line">                <span class="comment"># 2)如果这个base_file有云主机在使用，则将其加入到active_base_files变量中</span></span><br><span class="line">                <span class="comment"># 3)对base_file进行校验，如果校验失败，则将base_file加入到corrupt_base_files变量中</span></span><br><span class="line">                <span class="comment"># 4)如果base_file镜像存在且没有在使用，则将base_file加入到removable_base_files变量中</span></span><br><span class="line">                self._handle_base_image(img, base_file)</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> image_small <span class="keyword">and</span> <span class="keyword">not</span> image_resized:</span><br><span class="line">                    self.originals.append(base_file)</span><br><span class="line">        <span class="comment"># 找出那些还在使用的镜像缓存（有云主机的系统盘文件把这个镜像缓存作为base文件）</span></span><br><span class="line">        <span class="comment"># 将这些镜像从unexplained_images变量中移除，并加入到active_base_files变量中</span></span><br><span class="line">        inuse_backing_images = self._list_backing_images()</span><br><span class="line">        <span class="keyword">for</span> backing_path <span class="keyword">in</span> inuse_backing_images:</span><br><span class="line">            <span class="keyword">if</span> backing_path <span class="keyword">not</span> <span class="keyword">in</span> self.active_base_files:</span><br><span class="line">                self.active_base_files.append(backing_path)</span><br><span class="line">        <span class="comment"># 现在unexplained_images变量中剩下的镜像都是可以删除的了</span></span><br><span class="line">        <span class="comment"># 将他们加入到removable_base_files变量中</span></span><br><span class="line">        <span class="keyword">for</span> img <span class="keyword">in</span> self.unexplained_images:</span><br><span class="line">            LOG.warning(_(<span class="string">&#x27;Unknown base file: %s&#x27;</span>), img)</span><br><span class="line">            self.removable_base_files.append(img)</span><br><span class="line">        <span class="comment"># Dump these lists</span></span><br><span class="line">        <span class="keyword">if</span> self.active_base_files:</span><br><span class="line">            LOG.info(_(<span class="string">&#x27;Active base files: %s&#x27;</span>),</span><br><span class="line">                     <span class="string">&#x27; &#x27;</span>.join(self.active_base_files))</span><br><span class="line">        <span class="keyword">if</span> self.corrupt_base_files:</span><br><span class="line">            LOG.info(_(<span class="string">&#x27;Corrupt base files: %s&#x27;</span>),</span><br><span class="line">                     <span class="string">&#x27; &#x27;</span>.join(self.corrupt_base_files))</span><br><span class="line">        <span class="comment"># 删除没有使用的镜像缓存</span></span><br><span class="line">        <span class="keyword">if</span> self.removable_base_files:</span><br><span class="line">            LOG.info(_(<span class="string">&#x27;Removable base files: %s&#x27;</span>),</span><br><span class="line">                     <span class="string">&#x27; &#x27;</span>.join(self.removable_base_files))</span><br><span class="line">            <span class="comment">#remove_unused_base_images配置项，默认是true</span></span><br><span class="line">            <span class="keyword">if</span> CONF.remove_unused_base_images:</span><br><span class="line">                <span class="keyword">for</span> base_file <span class="keyword">in</span> self.removable_base_files:</span><br><span class="line">                    self._remove_base_file(base_file)</span><br><span class="line">        <span class="comment"># That&#x27;s it</span></span><br><span class="line">        LOG.debug(_(<span class="string">&#x27;Verification complete&#x27;</span>))</span><br></pre></td></tr></table></figure>
+<p>可以看到verify_base_images的核心逻辑是列出_base目录下名称合法的镜像缓存，过滤掉那些还在使用的镜像缓存，然后删除没有使用的镜像。具体的判断标准和流程可以参考代码中的注释。</p>
+<p>OpenStack使用分布式存储Ceph后，就不需要Glance的cache image了，我们可以通过修改配置文件来关闭这个功能。<br>修改配置<br>修改Glance配置文件/etc/glance/glance-api.conf。<br>默认配置项是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[paste_deploy]</span><br><span class="line">flavor=keystone+cachemanagement</span><br></pre></td></tr></table></figure>
+<p>修改配置项为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[paste_deploy]</span><br><span class="line">flavor=keystone</span><br></pre></td></tr></table></figure>
+<p>然后重启glance-api和glance-registry。</p>
+<p>参考：<a target="_blank" rel="noopener" href="http://www.sebastien-han.fr/blog/2014/11/03/openstack-glance-disable-cache-management-while-using-ceph-rbd/">http://www.sebastien-han.fr/blog/2014/11/03/openstack-glance-disable-cache-management-while-using-ceph-rbd/</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/openstack/" rel="tag"># openstack</a>
+              <a href="/tags/glance/" rel="tag"># glance</a>
+              <a href="/tags/nova/" rel="tag"># nova</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/16/8/" rel="prev" title="MariaDB基于Galera Cluster实现高可用">
+      <i class="fa fa-chevron-left"></i> MariaDB基于Galera Cluster实现高可用
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#nova%E9%95%9C%E5%83%8F%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">nova镜像缓存机制</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Lin</p>
+  <div class="site-description" itemprop="description">记录生活中的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lin</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

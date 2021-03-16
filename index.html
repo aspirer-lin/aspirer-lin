@@ -157,6 +157,419 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/16/9/" class="post-title-link" itemprop="url">openstack镜像预热调研</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-16 17:19:54 / 修改时间：17:24:57" itemprop="dateCreated datePublished" datetime="2021-03-16T17:19:54+08:00">2021-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/glance/" itemprop="url" rel="index"><span itemprop="name">glance</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/glance/nova/" itemprop="url" rel="index"><span itemprop="name">nova</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="nova镜像缓存机制"><a href="#nova镜像缓存机制" class="headerlink" title="nova镜像缓存机制"></a>nova镜像缓存机制</h3><p>当前云主机的系统盘有两种存储模式：<br>    1) 本地file存储，系统盘保存在对应宿主机的磁盘上；<br>    2）ceph存储，系统盘保存在对应的ceph pool中。</p>
+<p>某些上层用户（例如RDS）对系统盘的IO有较高的要求，因此系统盘会采用本地file存储的形式。在目前的网络条件下，从glance服务器上下载基础镜像到计算节点会花费较多的时间，所以nova中对于镜像的处理策略是：</p>
+<p>如果_base目录下有该镜像，创建虚拟机时，先根据镜像创建快照，然后再启动快照。如果_base目录下无该镜像，则先拷贝镜像到_base目录下，然后根据镜像创建快照，最后再启动快照。所以一般第一次启动虚拟机比较慢，后面启动就会很快。</p>
+<p>镜像从glance服务器上下载到计算节点上的_base目录做为基础镜像的缓存，其命名格式为image_id的sha1 hash形式，同时会将基础镜像格式转换为raw (RAW Image Format)。如果镜像支持CoW (copy-on-write)，那么就会将镜像变为实例配置的大小，如果不支持CoW，就直接将镜像拷贝到实例对应的目录中。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/16/9/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/16/8/" class="post-title-link" itemprop="url">MariaDB基于Galera Cluster实现高可用</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-16 17:08:49 / 修改时间：17:16:09" itemprop="dateCreated datePublished" datetime="2021-03-16T17:08:49+08:00">2021-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mariadb/" itemprop="url" rel="index"><span itemprop="name">mariadb</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mariadb/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="Galera介绍"><a href="#Galera介绍" class="headerlink" title="Galera介绍:"></a>Galera介绍:</h3><p>继承了Galera插件的MySQL集群，是一种新型的，数据不共享的，高度冗余的高可用方案，目前目前Galera Cluster有两个版本，分别是Percona Xtradb Cluster及MariaDB Cluster，Galera本身是具有多主特性的，即采用multi-master的集群架构，是一个既稳健，又在数据一致性、完整性及高性能方面有出色表现的高可用解决方案<br>如：三个节点组成了一个集群，与普通的主从架构不同，它们都可以作为主节点，三个节点是对等的，称为multi-master架构，当有客户端要写入或者读取数据时，连接哪个实例都是一样的，读到的数据是相同的，写入某一个节点之后，集群自己会将新数据同步到其它节点上面，这种架构不共享任何数据，是一种高冗余架构</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/16/8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/16/7/" class="post-title-link" itemprop="url">openstack kolla-ansible项目调研</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-16 16:47:27 / 修改时间：17:01:35" itemprop="dateCreated datePublished" datetime="2021-03-16T16:47:27+08:00">2021-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kolla/" itemprop="url" rel="index"><span itemprop="name">kolla</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kolla/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>【Kolla-ansible介绍】<br>kolla-ansible是从kolla项目中分离出来的一个可交付的项目。kolla-ansible负责部署容器化的openstack各个服务和基础设施组件。<br>kolla-ansible利用ansible进行openstack服务的配置、编排openstack各个服务容器的部署。利用容器的隔离性，达到openstack各服务<br>容器的升级、回退，控制升级、回退的影响范围，降低openstack集群运维的复杂度。</p>
+<p>【kolla-ansible安装】<br>前置条件：</p>
+<p>已经制作完成docker镜像并上传到本地仓库中，<br>部署节点需要两个ip一个用于ssh访问和访问外网（10.0.60.76），一个外部网络用于做neutron的router桥接（10.0.80.66)，后续装ceph的话需要ceph的管理ip，各个物理机都最少需要两个网卡<br>ansible需要各物理机之间免密码访问，需要完成相关配置。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/16/7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/16/6/" class="post-title-link" itemprop="url">openstack kolla项目调研</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-16 16:28:41 / 修改时间：16:52:57" itemprop="dateCreated datePublished" datetime="2021-03-16T16:28:41+08:00">2021-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kolla/" itemprop="url" rel="index"><span itemprop="name">kolla</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kolla/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本调研基于openstack q版本编写</p>
+<p>【kolla介绍】<br>kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。</p>
+<p>【kolla特性】</p>
+<ul>
+<li>支持所有服务的高可用；</li>
+<li>支持ceph做后端存储，glance/nova/cinder/gnocchi；</li>
+<li>支持多个Linux发行版，Centos/OracleLinux/Ubuntu/RHEL；</li>
+<li>同时支持源码安装和二进制包安装；</li>
+<li>物理机上只依赖Docker Engine和docker；</li>
+<li>支持原子升级。</li></ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/16/6/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/16/5/" class="post-title-link" itemprop="url">openstack分布式虚拟路由</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-16 15:56:08 / 修改时间：16:31:12" itemprop="dateCreated datePublished" datetime="2021-03-16T15:56:08+08:00">2021-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <img src="/2021/03/16/5/image2020-12-15_9-17-9.png" class>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/16/5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -171,7 +584,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/03/16/4/" class="post-title-link" itemprop="url">私有云网络拓扑</a>
+            <a href="/2021/03/16/4/" class="post-title-link" itemprop="url">openstack网络拓扑</a>
         </h2>
 
         <div class="post-meta">
@@ -182,7 +595,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-16 15:30:17 / 修改时间：15:42:16" itemprop="dateCreated datePublished" datetime="2021-03-16T15:30:17+08:00">2021-03-16</time>
+              <time title="创建时间：2021-03-16 15:30:17 / 修改时间：16:30:52" itemprop="dateCreated datePublished" datetime="2021-03-16T15:30:17+08:00">2021-03-16</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -191,6 +604,10 @@
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
                 </span>
             </span>
 
@@ -275,7 +692,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-16 15:21:14 / 修改时间：15:42:52" itemprop="dateCreated datePublished" datetime="2021-03-16T15:21:14+08:00">2021-03-16</time>
+              <time title="创建时间：2021-03-16 15:21:14 / 修改时间：16:00:47" itemprop="dateCreated datePublished" datetime="2021-03-16T15:21:14+08:00">2021-03-16</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -540,20 +957,20 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
