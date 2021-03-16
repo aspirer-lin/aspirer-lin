@@ -182,7 +182,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-16 13:40:47 / 修改时间：14:22:37" itemprop="dateCreated datePublished" datetime="2021-03-16T13:40:47+08:00">2021-03-16</time>
+              <time title="创建时间：2021-03-16 13:40:47 / 修改时间：14:32:59" itemprop="dateCreated datePublished" datetime="2021-03-16T13:40:47+08:00">2021-03-16</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -281,7 +281,7 @@
 </tbody></table>
 <p>具体步骤如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vi /etc/logrotate.d/sqlants</span></span><br><span class="line">/var/<span class="built_in">log</span>/sqlants/*.<span class="built_in">log</span> &#123;</span><br><span class="line">    weekly</span><br><span class="line">    rotate 14</span><br><span class="line">    size 5M</span><br><span class="line">    missingok</span><br><span class="line">    compress</span><br><span class="line">    minsize 100k</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这样我们自己生成的日志 /var/log/sqlants.log 也就可以进行日志轮替了，当然这些配置信息也是可以直接写入 /etc/logrotate.conf 这个配置文件的。</p>
+<p>这样我们自己生成的日志 /var/log/sqlants/sqlants.log 也就可以进行日志轮替了，当然这些配置信息也是可以直接写入 /etc/logrotate.conf 这个配置文件的。</p>
 
       
     </div>
