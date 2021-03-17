@@ -20,17 +20,24 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="记录生活中的点点滴滴">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Aspirer Lin">
-<meta property="og:url" content="http://example.com/tags/glance/index.html">
+  <meta name="description" content="修改代码的背景：客户需求。需要普通用户和项目管理员也能够修改云硬盘的只读&#x2F;读写权限在openstack(queens)中普通用户和项目管理员，没有权限修改云硬盘的只读&#x2F;读写权限。 修改代码解决的问题：普通用户和项目管理员也能够修改云硬盘的只读&#x2F;读写权限">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cinder(queens)修改源码支持非系统管理员也可以修改云硬盘读写权限">
+<meta property="og:url" content="http://example.com/2021/03/17/10/index.html">
 <meta property="og:site_name" content="Aspirer Lin">
-<meta property="og:description" content="记录生活中的点点滴滴">
+<meta property="og:description" content="修改代码的背景：客户需求。需要普通用户和项目管理员也能够修改云硬盘的只读&#x2F;读写权限在openstack(queens)中普通用户和项目管理员，没有权限修改云硬盘的只读&#x2F;读写权限。 修改代码解决的问题：普通用户和项目管理员也能够修改云硬盘的只读&#x2F;读写权限">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/03/17/10/1615945332080.jpg">
+<meta property="og:image" content="http://example.com/2021/03/17/10/image2019-7-12_10-4-48.png">
+<meta property="article:published_time" content="2021-03-17T01:34:25.000Z">
+<meta property="article:modified_time" content="2021-03-17T01:54:30.216Z">
 <meta property="article:author" content="Lin">
+<meta property="article:tag" content="openstack">
+<meta property="article:tag" content="cinder">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/03/17/10/1615945332080.jpg">
 
-<link rel="canonical" href="http://example.com/tags/glance/">
+<link rel="canonical" href="http://example.com/2021/03/17/10/">
 
 
 <script id="page-configurations">
@@ -38,12 +45,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: glance | Aspirer Lin</title>
+  <title>Cinder(queens)修改源码支持非系统管理员也可以修改云硬盘读写权限 | Aspirer Lin</title>
   
 
 
@@ -151,51 +158,105 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">glance
-          <small>标签</small>
-        </h2>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/17/10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Cinder(queens)修改源码支持非系统管理员也可以修改云硬盘读写权限
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-17 09:34:25 / 修改时间：09:54:30" itemprop="dateCreated datePublished" datetime="2021-03-17T09:34:25+08:00">2021-03-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/cinder/" itemprop="url" rel="index"><span itemprop="name">cinder</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+        <h4 id="修改代码的背景："><a href="#修改代码的背景：" class="headerlink" title="修改代码的背景："></a>修改代码的背景：</h4><p>客户需求。需要普通用户和项目管理员也能够修改云硬盘的只读/读写权限<br>在openstack(queens)中普通用户和项目管理员，没有权限修改云硬盘的只读/读写权限。</p>
+<h4 id="修改代码解决的问题："><a href="#修改代码解决的问题：" class="headerlink" title="修改代码解决的问题："></a>修改代码解决的问题：</h4><p>普通用户和项目管理员也能够修改云硬盘的只读/读写权限</p>
+<span id="more"></span>
+
+<p>修改Cinder源码cinder/cinder/volume/manager.py</p>
+<img src="/2021/03/17/10/1615945332080.jpg" class>
+
+<p>在horizon内设置云硬盘读写属性时，在metadata内把readonly属性存储起来，然后在cinder的代码中读取这一属性，然后让他能够正确的读取到用户设置的读写权限。</p>
+<img src="/2021/03/17/10/image2019-7-12_10-4-48.png" class>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-03-16T17:19:54+08:00"
-              content="2021-03-16">
-          03-16
-        </time>
-      </div>
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/openstack/" rel="tag"># openstack</a>
+              <a href="/tags/cinder/" rel="tag"># cinder</a>
+          </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/03/16/9/" itemprop="url">
-            <span itemprop="name">openstack镜像预热调研</span>
-          </a>
-      </div>
+        
 
-    </header>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/16/9/" rel="prev" title="openstack镜像预热调研">
+      <i class="fa fa-chevron-left"></i> openstack镜像预热调研
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/17/11/" rel="next" title="自研功能，file存储可以创建云硬盘导致的问题解决">
+      自研功能，file存储可以创建云硬盘导致的问题解决 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
   </article>
-
-    </div>
-  </div>
   
   
-  
-
   
 
 
@@ -248,6 +309,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E7%9A%84%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">修改代码的背景：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">修改代码解决的问题：</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

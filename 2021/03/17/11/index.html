@@ -20,21 +20,24 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="本调研基于openstack q版本编写 【kolla介绍】kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。 【kolla特性】  支持所有服务的高可用； 支持ceph做后端存储，glance&#x2F;nova&#x2F;cinder&#x2F;gnocchi； 支持多个Linux发行版，Centos&#x2F;OracleLinux&#x2F;Ubuntu&#x2F;RHEL； 同时支持源码安装">
+  <meta name="description" content="该功能基于nova(queens)版本 第一个问题：修改代码的背景：自研file存储支持数据盘功能，该数据盘为非官方创建（未通过nova），以img结尾，存在于&#x2F;var&#x2F;lib&#x2F;nova&#x2F;instance目录，但是在迁移和修改该配置过程中该数据盘会丢失 修改代码解决的问题：迁移或修改配置时拷贝以img结尾的数据盘文件">
 <meta property="og:type" content="article">
-<meta property="og:title" content="openstack kolla项目调研">
-<meta property="og:url" content="http://example.com/2021/03/16/6/index.html">
+<meta property="og:title" content="自研功能，file存储可以创建云硬盘导致的问题解决">
+<meta property="og:url" content="http://example.com/2021/03/17/11/index.html">
 <meta property="og:site_name" content="Aspirer Lin">
-<meta property="og:description" content="本调研基于openstack q版本编写 【kolla介绍】kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。 【kolla特性】  支持所有服务的高可用； 支持ceph做后端存储，glance&#x2F;nova&#x2F;cinder&#x2F;gnocchi； 支持多个Linux发行版，Centos&#x2F;OracleLinux&#x2F;Ubuntu&#x2F;RHEL； 同时支持源码安装">
+<meta property="og:description" content="该功能基于nova(queens)版本 第一个问题：修改代码的背景：自研file存储支持数据盘功能，该数据盘为非官方创建（未通过nova），以img结尾，存在于&#x2F;var&#x2F;lib&#x2F;nova&#x2F;instance目录，但是在迁移和修改该配置过程中该数据盘会丢失 修改代码解决的问题：迁移或修改配置时拷贝以img结尾的数据盘文件">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-03-16T08:28:41.000Z">
-<meta property="article:modified_time" content="2021-03-16T08:52:57.177Z">
+<meta property="og:image" content="http://example.com/2021/03/17/11/1615947040109.jpg">
+<meta property="og:image" content="http://example.com/2021/03/17/11/1615947440702.jpg">
+<meta property="article:published_time" content="2021-03-17T02:05:13.000Z">
+<meta property="article:modified_time" content="2021-03-17T03:25:19.641Z">
 <meta property="article:author" content="Lin">
 <meta property="article:tag" content="openstack">
-<meta property="article:tag" content="kolla">
+<meta property="article:tag" content="nova">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/03/17/11/1615947040109.jpg">
 
-<link rel="canonical" href="http://example.com/2021/03/16/6/">
+<link rel="canonical" href="http://example.com/2021/03/17/11/">
 
 
 <script id="page-configurations">
@@ -47,7 +50,7 @@
   };
 </script>
 
-  <title>openstack kolla项目调研 | Aspirer Lin</title>
+  <title>自研功能，file存储可以创建云硬盘导致的问题解决 | Aspirer Lin</title>
   
 
 
@@ -162,7 +165,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/16/6/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/17/11/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -175,7 +178,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          openstack kolla项目调研
+          自研功能，file存储可以创建云硬盘导致的问题解决
         </h1>
 
         <div class="post-meta">
@@ -186,7 +189,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-16 16:28:41 / 修改时间：16:52:57" itemprop="dateCreated datePublished" datetime="2021-03-16T16:28:41+08:00">2021-03-16</time>
+              <time title="创建时间：2021-03-17 10:05:13 / 修改时间：11:25:19" itemprop="dateCreated datePublished" datetime="2021-03-17T10:05:13+08:00">2021-03-17</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -194,11 +197,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/kolla/" itemprop="url" rel="index"><span itemprop="name">kolla</span></a>
+                  <a href="/categories/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/kolla/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                  <a href="/categories/openstack/nova/" itemprop="url" rel="index"><span itemprop="name">nova</span></a>
                 </span>
             </span>
 
@@ -213,42 +216,23 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>本调研基于openstack q版本编写</p>
-<p>【kolla介绍】<br>kolla项目负责镜像的构建，为kolla-ansible部署提供生产级别的openstack各服务镜像。</p>
-<p>【kolla特性】</p>
-<ul>
-<li>支持所有服务的高可用；</li>
-<li>支持ceph做后端存储，glance/nova/cinder/gnocchi；</li>
-<li>支持多个Linux发行版，Centos/OracleLinux/Ubuntu/RHEL；</li>
-<li>同时支持源码安装和二进制包安装；</li>
-<li>物理机上只依赖Docker Engine和docker；</li>
-<li>支持原子升级。<span id="more"></span></li>
-</ul>
-<p>制作openstack容器镜像会用到一些依赖包，需要在本地制作yum源，这里就不介绍怎么制作了。嫌制作慢的推荐可以去研究下。</p>
-<p>从openstack官方下载kolla项目<a target="_blank" rel="noopener" href="https://github.com/openstack/kolla/archive/stable/queens.zip">https://github.com/openstack/kolla/archive/stable/queens.zip</a>  下载Queens版本的kolla</p>
-<p>配置yum仓库添加阿里镜像稳定版仓库</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
-<p>添加阿里源时有时会报错，如果报错，使用如下命令使用官方源</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除异常源</span></span><br><span class="line">sudo rm -f /etc/yum.repos.d/docker-ce.repo</span><br><span class="line"><span class="comment">#使用官方源</span></span><br><span class="line">sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
+        <p>该功能基于nova(queens)版本</p>
+<h4 id="第一个问题："><a href="#第一个问题：" class="headerlink" title="第一个问题："></a>第一个问题：</h4><h4 id="修改代码的背景："><a href="#修改代码的背景：" class="headerlink" title="修改代码的背景："></a>修改代码的背景：</h4><p>自研file存储支持数据盘功能，该数据盘为非官方创建（未通过nova），以img结尾，存在于/var/lib/nova/instance目录，但是在迁移和修改该配置过程中该数据盘会丢失</p>
+<h4 id="修改代码解决的问题："><a href="#修改代码解决的问题：" class="headerlink" title="修改代码解决的问题："></a>修改代码解决的问题：</h4><p>迁移或修改配置时拷贝以img结尾的数据盘文件</p>
+<span id="more"></span>
+<p>nova/nova/virt/libvirt/driver.py</p>
+<img src="/2021/03/17/11/1615947040109.jpg" class>
+<h4 id="代码分析："><a href="#代码分析：" class="headerlink" title="代码分析："></a>代码分析：</h4><p>迁移和修改该配置过程中，/var/lib/nova/instance目录下对应的云主机目录会被重命名，然后创建一个新的目录供云主机使用（将老目录下的必要文件拷贝到新目录），在操作完成之后，删除老目录。因为nova不知道我们自建了云硬盘img文件，所以不会拷贝，需要人为添加拷贝代码</p>
+<h3 id="第二个问题"><a href="#第二个问题" class="headerlink" title="第二个问题"></a>第二个问题</h3><p>物理机重启后nova重启云主机时添加日志通知代码</p>
+<h4 id="修改代码的背景：-1"><a href="#修改代码的背景：-1" class="headerlink" title="修改代码的背景："></a>修改代码的背景：</h4><p>因为物理服务器重启后新做的file存储支持云硬盘功能挂载不回去，需要让他在重启后能够在重新挂载回去，需要添加一个操作日志，然后通过我们的hearkener组件监听到日志然后把数据盘挂载回去。</p>
+<h4 id="修改代码解决的问题：-1"><a href="#修改代码解决的问题：-1" class="headerlink" title="修改代码解决的问题："></a>修改代码解决的问题：</h4><p>解决物理机重启，本地数据盘没有在挂载回去的问题。</p>
+<p>nova/nova/compute/manager.py</p>
+<h4 id="代码分析：-1"><a href="#代码分析：-1" class="headerlink" title="代码分析："></a>代码分析：</h4><p>nova重启时调用nova的操作日志代码插入我们需要的日志</p>
+<img src="/2021/03/17/11/1615947440702.jpg" class>
 
-<p>准备kolla需要的基础环境</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install python-pip python-devel libffi-devel gcc openssl-devel libselinux-python vim git wget -y</span><br></pre></td></tr></table></figure>
-<p>安装docker ce</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker-ce -y</span><br></pre></td></tr></table></figure>
-<p>开启docker的共享挂载功能：所谓共享挂载即同一个目录或设备可以挂载到多个不同的路径并且能够保持互相之间的共享可见性<br>类似于 mount –shared。在 OpenStack for Kolla 中，主要解决 Neutron 的 namespace 在不同 container 中得以保持实效性的问题。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/systemd/system/docker.service.d</span><br><span class="line">tee /etc/systemd/system/docker.service.d/kolla.conf &lt;&lt; <span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">[Service]</span><br><span class="line">MountFlags=shared</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-<p>配置阿里云的docker加速器，加快pull registry镜像</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /etc/docker</span><br><span class="line">tee /etc/docker/daemon.json &lt;&lt;-<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://a5aghnme.mirror.aliyuncs.com&quot;</span>]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-<p>重启docker相关服务和设置docker开机自启</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload &amp;&amp; systemctl <span class="built_in">enable</span> docker &amp;&amp; systemctl restart docker</span><br></pre></td></tr></table></figure>
-<p>准备python基础环境</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install -U tox docker jinja2 --ignore-installed requests -i https://pypi.tuna.tsinghua.edu.cn/simple</span><br><span class="line">pip install pip==20.3.3 -i https://pypi.tuna.tsinghua.edu.cn/simple</span><br></pre></td></tr></table></figure>
-<p>把前面下载的Queens版本的kolla代码解压到任意目录，我这里放到了/root目录下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /root/kolla</span><br><span class="line">pip install -r requirements.txt --ignore-installed PyYAML -i https://pypi.tuna.tsinghua.edu.cn/simple -e .</span><br><span class="line">pip install -r test-requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple -e .</span><br></pre></td></tr></table></figure>
-<p>拷贝kolla-build.conf到/etc/kolla/目录下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/kolla</span><br><span class="line">cp /root/kolla/etc/kolla/kolla-build.conf /etc/kolla/</span><br></pre></td></tr></table></figure>
-<p>制作visionstack需要的基础docker镜像</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一次制作少点镜像，制作多了机器会挂。</span></span><br><span class="line">kolla-build kolla-toolbox chrony cron fluentd glance horizon</span><br><span class="line">kolla-build keystone mariadb memcached influxdb neutron</span><br><span class="line">kolla-build nova-</span><br><span class="line">kolla-build openvswitch rabbitmq</span><br><span class="line">kolla-build senlin sqlants friedrice turtle hearkener qyapi</span><br><span class="line">kolla-build vs-log-collecter vs-monitor-agent cinder ceph</span><br><span class="line">kolla-build haproxy keepalived</span><br></pre></td></tr></table></figure>
+
+
+
 
     </div>
 
@@ -259,7 +243,7 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/openstack/" rel="tag"># openstack</a>
-              <a href="/tags/kolla/" rel="tag"># kolla</a>
+              <a href="/tags/nova/" rel="tag"># nova</a>
           </div>
 
         
@@ -268,13 +252,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/03/16/5/" rel="prev" title="openstack分布式虚拟路由">
-      <i class="fa fa-chevron-left"></i> openstack分布式虚拟路由
+    <a href="/2021/03/17/10/" rel="prev" title="Cinder(queens)修改源码支持非系统管理员也可以修改云硬盘读写权限">
+      <i class="fa fa-chevron-left"></i> Cinder(queens)修改源码支持非系统管理员也可以修改云硬盘读写权限
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/03/16/7/" rel="next" title="openstack kolla-ansible项目调研">
-      openstack kolla-ansible项目调研 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -333,6 +314,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">第一个问题：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E7%9A%84%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">修改代码的背景：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">修改代码解决的问题：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">代码分析：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E4%B8%AA%E9%97%AE%E9%A2%98"><span class="nav-number"></span> <span class="nav-text">第二个问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E7%9A%84%E8%83%8C%E6%99%AF%EF%BC%9A-1"><span class="nav-number">1.</span> <span class="nav-text">修改代码的背景：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A-1"><span class="nav-number">2.</span> <span class="nav-text">修改代码解决的问题：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%9A-1"><span class="nav-number">3.</span> <span class="nav-text">代码分析：</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
