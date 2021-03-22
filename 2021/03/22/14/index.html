@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="FIO是测试IOPS的非常好的工具，用来对磁盘进行压力测试和验证。磁盘IO是检查磁盘性能的重要指标，可以按照负载情况分成照顺序读写，随机读写两大类。FIO是一个可以产生很多线程或进程并执行用户指定的特定类型I&#x2F;O操作的工具，FIO的典型用途是编写和模拟的I&#x2F;O负载匹配的作业文件。也就是说FIO 是一个多线程io生成工具，可以生成多种IO模式，用来测试磁盘设备的性能（也包含文件系统：如针对网络文件系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="磁盘io测试工具fio">
+<meta property="og:url" content="http://example.com/2021/03/22/14/index.html">
+<meta property="og:site_name" content="Aspirer Lin">
+<meta property="og:description" content="FIO是测试IOPS的非常好的工具，用来对磁盘进行压力测试和验证。磁盘IO是检查磁盘性能的重要指标，可以按照负载情况分成照顺序读写，随机读写两大类。FIO是一个可以产生很多线程或进程并执行用户指定的特定类型I&#x2F;O操作的工具，FIO的典型用途是编写和模拟的I&#x2F;O负载匹配的作业文件。也就是说FIO 是一个多线程io生成工具，可以生成多种IO模式，用来测试磁盘设备的性能（也包含文件系统：如针对网络文件系">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-22T02:09:27.000Z">
+<meta property="article:modified_time" content="2021-03-22T02:28:34.101Z">
+<meta property="article:author" content="Lin">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="磁盘">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/03/22/14/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>磁盘io测试工具fio | Aspirer Lin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Aspirer Lin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/22/14/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lin">
+      <meta itemprop="description" content="记录生活中的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Aspirer Lin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          磁盘io测试工具fio
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-22 10:09:27 / 修改时间：10:28:34" itemprop="dateCreated datePublished" datetime="2021-03-22T10:09:27+08:00">2021-03-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/%E7%A3%81%E7%9B%98/" itemprop="url" rel="index"><span itemprop="name">磁盘</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>FIO是测试IOPS的非常好的工具，用来对磁盘进行压力测试和验证。磁盘IO是检查磁盘性能的重要指标，可以按照负载情况分成照顺序读写，随机读写两大类。FIO是一个可以产生很多线程或进程并执行用户指定的特定类型I/O操作的工具，FIO的典型用途是编写和模拟的I/O负载匹配的作业文件。也就是说FIO 是一个多线程io生成工具，可以生成多种IO模式，用来测试磁盘设备的性能（也包含文件系统：如针对网络文件系统 NFS 的IO测试）</p>
+<p><span style="color:red;">注意：fio只能在裸盘中使用，在有数据的盘中使用会破坏数据导致崩溃，慎重使用。</span></p>
+<span id="more"></span>
+<h5 id="FIO-工具常用参数："><a href="#FIO-工具常用参数：" class="headerlink" title="FIO 工具常用参数："></a>FIO 工具常用参数：</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">参数说明：</span><br><span class="line">filename=/dev/sdb1 测试文件名称，通常选择需要测试的盘的data目录。</span><br><span class="line">direct=1 是否使用directIO，测试过程绕过OS自带的buffer，使测试磁盘的结果更真实。Linux读写的时候，内核维护了缓存，数据先写到缓存，后面再后台写到SSD。读的时候也优先读缓存里的数据。这样速度可以加快，但是一旦掉电缓存里的数据就没了。所以有一种模式叫做DirectIO，跳过缓存，直接读写SSD。 </span><br><span class="line">rw=randwrite 测试随机写的I/O</span><br><span class="line">rw=randrw 测试随机写和读的I/O</span><br><span class="line">bs=16k 单次io的块文件大小为16k</span><br><span class="line">bsrange=512-2048 同上，提定数据块的大小范围</span><br><span class="line">size=5G 每个线程读写的数据量是5GB。</span><br><span class="line">numjobs=1 每个job（任务）开1个线程，这里用了几，后面每个用-name指定的任务就开几个线程测试。所以最终线程数=任务数（几个name=jobx）* numjobs。 </span><br><span class="line">name=job1：一个任务的名字，重复了也没关系。如果fio -name=job1 -name=job2，建立了两个任务，共享-name=job1之前的参数。-name之后的就是job2任务独有的参数。 </span><br><span class="line">thread  使用pthread_create创建线程，另一种是fork创建进程。进程的开销比线程要大，一般都采用thread测试。 </span><br><span class="line">runtime=1000 测试时间为1000秒，如果不写则一直将5g文件分4k每次写完为止。</span><br><span class="line">ioengine=libaio 指定io引擎使用libaio方式。libaio：Linux本地异步I/O。请注意，Linux可能只支持具有非缓冲I/O的排队行为（设置为“direct=1”或“buffered=0”）；rbd:通过librbd直接访问CEPH Rados </span><br><span class="line">iodepth=16 队列的深度为16.在异步模式下，CPU不能一直无限的发命令到SSD。比如SSD执行读写如果发生了卡顿，那有可能系统会一直不停的发命令，几千个，甚至几万个，这样一方面SSD扛不住，另一方面这么多命令会很占内存，系统也要挂掉了。这样，就带来一个参数叫做队列深度。</span><br><span class="line">Block Devices（RBD），无需使用内核RBD驱动程序（rbd.ko）。该参数包含很多ioengine，如：libhdfs/rdma等</span><br><span class="line">rwmixwrite=30 在混合读写的模式下，写占30%</span><br><span class="line">group_reporting 关于显示结果的，汇总每个进程的信息。</span><br><span class="line">此外</span><br><span class="line">lockmem=1g 只使用1g内存进行测试。</span><br><span class="line">zero_buffers 用0初始化系统buffer。</span><br><span class="line">nrfiles=8 每个进程生成文件的数量。</span><br><span class="line">磁盘读写常用测试点：</span><br><span class="line">1. Read=100% Ramdon=100% rw=randread (100%随机读)</span><br><span class="line">2. Read=100% Sequence=100% rw=<span class="built_in">read</span> （100%顺序读）</span><br><span class="line">3. Write=100% Sequence=100% rw=write （100%顺序写）</span><br><span class="line">4. Write=100% Ramdon=100% rw=randwrite （100%随机写）</span><br><span class="line">5. Read=70% Sequence=100% rw=rw, rwmixread=70, rwmixwrite=30</span><br><span class="line">（70%顺序读，30%顺序写）</span><br><span class="line">6. Read=70% Ramdon=100% rw=randrw, rwmixread=70, rwmixwrite=30</span><br><span class="line">(70%随机读，30%随机写)</span><br></pre></td></tr></table></figure>
+<p>fio例子：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -filename 指定盘的时候必须为裸盘，如果在有数据的盘中使用会导致盘内数据丢失。慎用。</span></span><br><span class="line">[root@vs-controller sdb]<span class="comment"># fio -ioengine=libaio -bs=4k -direct=1 -thread -rw=read -filename=/dev/sda -name=&quot;BS 4KB read test&quot; -iodepth=16 -runtime=60</span></span><br><span class="line">BS 4KB <span class="built_in">read</span> <span class="built_in">test</span>: (g=0): rw=<span class="built_in">read</span>, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=16</span><br><span class="line">fio-3.7</span><br><span class="line">Starting 1 thread</span><br><span class="line">Jobs: 1 (f=1): [R(1)][100.0%][r=89.3MiB/s,w=0KiB/s][r=22.9k,w=0 IOPS][eta 00m:00s]</span><br><span class="line">BS 4KB <span class="built_in">read</span> <span class="built_in">test</span>: (groupid=0, <span class="built_in">jobs</span>=1): err= 0: pid=18557: Thu Apr 11 13:08:11 2019</span><br><span class="line">   <span class="built_in">read</span>: IOPS=22.7k, BW=88.5MiB/s (92.8MB/s)(5313MiB/60001msec)</span><br><span class="line">    slat (nsec): min=901, max=168330, avg=6932.34, stdev=1348.82</span><br><span class="line">    clat (usec): min=90, max=63760, avg=698.08, stdev=240.83</span><br><span class="line">     lat (usec): min=97, max=63762, avg=705.17, stdev=240.81</span><br><span class="line">    clat percentiles (usec):</span><br><span class="line">     |  1.00th=[  619],  5.00th=[  627], 10.00th=[  627], 20.00th=[  635],</span><br><span class="line">     | 30.00th=[  635], 40.00th=[  685], 50.00th=[  717], 60.00th=[  725],</span><br><span class="line">     | 70.00th=[  725], 80.00th=[  725], 90.00th=[  734], 95.00th=[  816],</span><br><span class="line">     | 99.00th=[ 1004], 99.50th=[ 1020], 99.90th=[ 1057], 99.95th=[ 1057],</span><br><span class="line">     | 99.99th=[ 1860]</span><br><span class="line">   bw (  KiB/s): min=62144, max=91552, per=100.00%, avg=90669.02, stdev=3533.77, samples=120</span><br><span class="line">   iops        : min=15536, max=22888, avg=22667.27, stdev=883.44, samples=120</span><br><span class="line">  lat (usec)   : 100=0.01%, 250=0.01%, 500=0.01%, 750=93.85%, 1000=5.14%</span><br><span class="line">  lat (msec)   : 2=0.99%, 4=0.01%, 10=0.01%, 50=0.01%, 100=0.01%</span><br><span class="line">  cpu          : usr=5.35%, sys=23.17%, ctx=1359692, majf=0, minf=17</span><br><span class="line">  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=100.0%, 32=0.0%, &gt;=64=0.0%</span><br><span class="line">     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%</span><br><span class="line">     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.1%, 32=0.0%, 64=0.0%, &gt;=64=0.0%</span><br><span class="line">     issued rwts: total=1360097,0,0,0 short=0,0,0,0 dropped=0,0,0,0</span><br><span class="line">     latency   : target=0, window=0, percentile=100.00%, depth=16</span><br><span class="line"> </span><br><span class="line">Run status group 0 (all <span class="built_in">jobs</span>):</span><br><span class="line">   READ: bw=88.5MiB/s (92.8MB/s), 88.5MiB/s-88.5MiB/s (92.8MB/s-92.8MB/s), io=5313MiB (5571MB), run=60001-60001msec</span><br><span class="line"> </span><br><span class="line">Disk stats (<span class="built_in">read</span>/write):</span><br><span class="line">  sda: ios=1357472/0, merge=70/0, ticks=949141/0, in_queue=948776, util=99.88%</span><br></pre></td></tr></table></figure>
+<h5 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">io=执行了多少M的IO</span><br><span class="line">bw=平均IO带宽</span><br><span class="line">iops=IOPS</span><br><span class="line">runt=线程运行时间</span><br><span class="line">slat=提交延迟，提交该IO请求到kernel所花的时间（不包括kernel处理的时间）</span><br><span class="line">clat=完成延迟, 提交该IO请求到kernel后，处理所花的时间</span><br><span class="line">lat=响应时间</span><br><span class="line">bw=带宽</span><br><span class="line">cpu=利用率</span><br><span class="line">IO depths=io队列</span><br><span class="line">IO submit=单个IO提交要提交的IO数</span><br><span class="line">IO complete=Like the above submit number, but <span class="keyword">for</span> completions instead.</span><br><span class="line">IO issued=The number of <span class="built_in">read</span>/write requests issued, and how many of them were short.</span><br><span class="line">IO latencies=IO完延迟的分布</span><br><span class="line">io=总共执行了多少size的IO</span><br><span class="line">aggrb=group总带宽</span><br><span class="line">minb=最小.平均带宽.</span><br><span class="line">maxb=最大平均带宽.</span><br><span class="line">mint=group中线程的最短运行时间.</span><br><span class="line">maxt=group中线程的最长运行时间.</span><br><span class="line">ios=所有group总共执行的IO数.</span><br><span class="line">merge=总共发生的IO合并数.</span><br><span class="line">ticks=Number of ticks we kept the disk busy.</span><br><span class="line">io_queue=花费在队列上的总共时间.</span><br><span class="line">util=磁盘利用率</span><br></pre></td></tr></table></figure>
+<h5 id="Iostat介绍"><a href="#Iostat介绍" class="headerlink" title="Iostat介绍"></a>Iostat介绍</h5><p>iostat主要用于监控系统设备的IO负载情况，iostat首次运行时显示自系统启动开始的各项统计信息，之后运行iostat将显示自上次运行该命令以后的统计信息。用户可以通过指定统计的次数和时间来获得所需的统计信息。</p>
+<p>iostat使用范例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">iostat -d -x -k 1 10</span><br><span class="line">Device:    rrqm/s wrqm/s   r/s   w/s  rsec/s  wsec/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await  svctm  %util</span><br><span class="line">sdb          1.56  28.31  7.80 31.49   42.51    2.92    21.26     1.46     1.16     0.03    0.79   2.62  10.28</span><br><span class="line">Device:    rrqm/s wrqm/s   r/s   w/s  rsec/s  wsec/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await  svctm  %util</span><br><span class="line">sdb          2.00  20.00 381.00  7.00 12320.00  216.00  6160.00   108.00    32.31     1.75    4.50   2.17  84.20</span><br></pre></td></tr></table></figure>
+<p>-d: 显示该设备的状态的参数；<br>-x：是一个比较常用的选项，该选项将用于显示和io相关的扩展数据。<br>-k:  静态显示每秒的统计（单位kilobytes ）<br>1: 第一个数字表示每隔1秒刷新一次数据显示。<br>10：第二个数字表示总共的刷新次数 </p>
+<h5 id="输出信息的含义"><a href="#输出信息的含义" class="headerlink" title="输出信息的含义"></a>输出信息的含义</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">rrqm/s：每秒这个设备相关的读取请求有多少被Merge了（当系统调用需要读取数据的时候，VFS将请求发到各个FS，如果FS发现不同的读取请求读取的是相同Block的数据，FS会将这个请求合并Merge）；</span><br><span class="line">wrqm/s：每秒这个设备相关的写入请求有多少被Merge了。</span><br><span class="line">r/s： 该设备的每秒完成的读请求数（merge合并之后的）</span><br><span class="line">w/s:  该设备的每秒完成的写请求数（merge合并之后的）</span><br><span class="line">rsec/s：每秒读取的扇区数；</span><br><span class="line">wsec/：每秒写入的扇区数。</span><br><span class="line">rKB/s：每秒发送给该设备的总读请求数 </span><br><span class="line">wKB/s：每秒发送给该设备的总写请求数 </span><br><span class="line">avgrq-sz 平均请求扇区的大小</span><br><span class="line">avgqu-sz 是平均请求队列的长度。毫无疑问，队列长度越短越好。    </span><br><span class="line">await：  每一个IO请求的处理的平均时间（单位是微秒毫秒）。这里可以理解为IO的响应时间，一般地系统IO响应时间应该低于5ms，如果大于10ms就比较大了。这个时间包括了队列时间和服务时间，也就是说，一般情况下，await大于svctm，它们的差值越小，则说明队列时间越短，反之差值越大，队列时间越长，说明系统出了问题。</span><br><span class="line">svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位）。如果svctm的值与await很接近，表示几乎没有I/O等待，磁盘性能很好，如果await的值远高于svctm的值，则表示I/O队列等待太长，系统上运行的应用程序将变慢。</span><br><span class="line">%util： 在统计时间内所有处理IO时间，除以总共统计时间。例如，如果统计间隔1秒，该设备有0.8秒在处理IO，而0.2秒闲置，那么该设备的%util = 0.8/1 = 80%，所以该参数暗示了设备的繁忙程度。一般地，如果该参数是100%表示设备已经接近满负荷运行了（当然如果是多磁盘，即使%util是100%，因为磁盘的并发能力，所以磁盘使用未必就到了瓶颈）。</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+              <a href="/tags/%E7%A3%81%E7%9B%98/" rel="tag"># 磁盘</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/17/13/" rel="prev" title="通过ssh的方式操作华为防火墙">
+      <i class="fa fa-chevron-left"></i> 通过ssh的方式操作华为防火墙
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/22/15/" rel="next" title="Zabbix调研">
+      Zabbix调研 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#FIO-%E5%B7%A5%E5%85%B7%E5%B8%B8%E7%94%A8%E5%8F%82%E6%95%B0%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">FIO 工具常用参数：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="nav-number">2.</span> <span class="nav-text">参数说明</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Iostat%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.</span> <span class="nav-text">Iostat介绍</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E4%BF%A1%E6%81%AF%E7%9A%84%E5%90%AB%E4%B9%89"><span class="nav-number">4.</span> <span class="nav-text">输出信息的含义</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Lin</p>
+  <div class="site-description" itemprop="description">记录生活中的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lin</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
