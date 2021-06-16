@@ -20,16 +20,23 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="#####名词解释：SSO：单点登录（Single Sign On），是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。 LDAP：轻型目录访问协议（Lightweight Directory Access Protocol）， 是一个开放的，中立的，工业标准的应用协议，通过IP协议提供访问控制和维护分布式信息的目录信息">
+  <meta name="description" content="名词解释：SSO：单点登录（Single Sign On），是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。 LDAP：轻型目录访问协议（Lightweight Directory Access Protocol）， 是一个开放的，中立的，工业标准的应用协议，通过IP协议提供访问控制和维护分布式信息的目录信息。LDAP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SSO单点登录(Single Sign On)调研">
 <meta property="og:url" content="http://example.com/2021/06/22/16/index.html">
 <meta property="og:site_name" content="Aspirer Lin">
-<meta property="og:description" content="#####名词解释：SSO：单点登录（Single Sign On），是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。 LDAP：轻型目录访问协议（Lightweight Directory Access Protocol）， 是一个开放的，中立的，工业标准的应用协议，通过IP协议提供访问控制和维护分布式信息的目录信息">
+<meta property="og:description" content="名词解释：SSO：单点登录（Single Sign On），是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。 LDAP：轻型目录访问协议（Lightweight Directory Access Protocol）， 是一个开放的，中立的，工业标准的应用协议，通过IP协议提供访问控制和维护分布式信息的目录信息。LDAP">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/2021/06/22/16/image.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image2.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image3.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image4.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image5.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image6.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image7.png">
+<meta property="og:image" content="http://example.com/2021/06/22/16/image8.png">
 <meta property="article:published_time" content="2021-06-22T08:02:12.000Z">
-<meta property="article:modified_time" content="2021-06-16T08:10:11.678Z">
+<meta property="article:modified_time" content="2021-06-16T08:20:30.572Z">
 <meta property="article:author" content="Lin">
 <meta property="article:tag" content="LDAP">
 <meta property="article:tag" content="SSO">
@@ -196,7 +203,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-16 16:10:11" itemprop="dateModified" datetime="2021-06-16T16:10:11+08:00">2021-06-16</time>
+                <time title="修改时间：2021-06-16 16:20:30" itemprop="dateModified" datetime="2021-06-16T16:20:30+08:00">2021-06-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -227,12 +234,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>#####名词解释：<br>SSO：单点登录（Single Sign On），是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。</p>
-<p>LDAP：轻型目录访问协议（Lightweight Directory Access Protocol）， 是一个开放的，中立的，工业标准的应用协议，通过IP协议提供访问控制和维护分布式信息的目录信息。LDAP的一个常用用途是单点登录，用户可以在多个服务中使用同一个密码，通常用于公司内部网站的登录中（这样他们可以在公司计算机上登录一次，便可以自动在公司内部网上登录）。</p>
-<p>CAS：耶鲁大学开发的单点登录（Single Sign On）系统称为CAS（Central Authentication Server），他是一个开源的、相对比较简单易用的SSO解决方案。</p>
+        <h5 id="名词解释："><a href="#名词解释：" class="headerlink" title="名词解释："></a>名词解释：</h5><p><strong>SSO：单点登录（Single Sign On）</strong>，是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。</p>
+<p><strong>LDAP：轻型目录访问协议（Lightweight Directory Access Protocol）</strong>， 是一个开放的，中立的，工业标准的应用协议，通过IP协议提供访问控制和维护分布式信息的目录信息。LDAP的一个常用用途是单点登录，用户可以在多个服务中使用同一个密码，通常用于公司内部网站的登录中（这样他们可以在公司计算机上登录一次，便可以自动在公司内部网上登录）。</p>
+<p><strong>CAS：耶鲁大学开发的单点登录（Single Sign On）</strong>，系统称为CAS（Central Authentication Server），他是一个开源的、相对比较简单易用的SSO解决方案。</p>
 <span id="more"></span>
-<p>一开始用的CAS，使用后发现应用不到我们的环境内，但是他给了后续自研单点登录的思路。</p>
-<p>CAS标准的单点登录过程具有如下特点：</p>
+<p>一开始用的CAS，使用后发现应用不到我们的环境内，但是他给了后续自研单点登录的思路。<br>CAS标准的单点登录过程具有如下特点：</p>
 <ol>
 <li>分为两端：CAS认证服务端、CAS客户端（应用），用户认证及登录发生在CAS端；</li>
 <li>发起者可以是CAS服务端，也可以是应用端；</li>
@@ -240,12 +246,110 @@
 <li>登录时会发生应用与CAS间的页面跳转；</li>
 <li>应用端需要与CAS端直接通信，应用端会通过服务器后台通信访问CAS端进行验证。</li>
 </ol>
-<p>#####为什么没有实现真正的单点登录功能？<br>openstack和k8s都是支持ldap实现单点登录功能的，而为什么我没有实现它呢？</p>
+<h5 id="为什么没有实现真正的单点登录功能？"><a href="#为什么没有实现真正的单点登录功能？" class="headerlink" title="为什么没有实现真正的单点登录功能？"></a>为什么没有实现真正的单点登录功能？</h5><p>openstack和k8s都是支持ldap实现单点登录功能的，而为什么我没有实现它呢？</p>
 <p>openstack/visionstack：首先openstack使用ldap的话，需要在keystone中开启，然后如果是一开始认证底层就用的ldap的话那没问题可以直接使用，而如果是中间加入ldap认证的话，就要区分域就是之前已经创建的项目和后面新增的ldap的创建的项目和虚拟机不在一起，因为用的是两套认证。<br>然后说到visionstack的话因为是我们自研的原因，整个架构发生了变化，他的前端入口不在是django了而是变成了vue前端渲染和调用后台接口来实现的，而要让单点登录功能实现需要做到，认证、登录和页面跳转是后端控制的，即在登录和认证中加入单点登录逻辑，而目前的visionstack是没法实现的。</p>
 <p>k8s/kuboard：kuboard倒是可以直接用ldap认证，但也只是底层认证可以用ldap即用户身份信息存储在ldap中，要登录的话还是要输入账号密码的。因为该项目没有开源，不能在它的登录逻辑之上包一层单点登录逻辑。</p>
-<p>#####当前做到什么样？<br>目前实现的单点登录功能，没有实现上面的sso所说的，用户只需登录一次 ，就可以访问所有互相信任的应用系统。</p>
+<h5 id="当前做到什么样？"><a href="#当前做到什么样？" class="headerlink" title="当前做到什么样？"></a>当前做到什么样？</h5><p>目前实现的单点登录功能，没有实现上面的sso所说的，用户只需登录一次 ，就可以访问所有互相信任的应用系统。</p>
 <p>目前是通过一个sso web页面来做一个单点登录功能如下图所示：</p>
 <img src="/2021/06/22/16/image.png" class>
+<h5 id="使用流程："><a href="#使用流程：" class="headerlink" title="使用流程："></a>使用流程：</h5><p>1、中心认证服务初始化<br>参数：<br>ldap host：            该参数为ldap服务的地址及端口<br>ldap base dn：      表示ldap的基础目录<br>ldap admin：         cn表示用户，dc表示域，例如下面填写的内容，可以把他想成com/zywx/admin这样一个目录<br>ldap pass：            admin账户的登录密码，该密码需要填写的内容为，ldap服务的管理员密码<br>系统管理员账号：  表示sso server的系统管理员名称需要同ldap admin的名称一致，密码同ldap pass<br>cookie有效期：      就是使用单点登录后，存放认证信息的时间。<br>单点登录子域名：  这个子域名是解决跨域cookie跨域问题存在的。</p>
+<img src="/2021/06/22/16/image2.png" class>
+<p>2、登录</p>
+<img src="/2021/06/22/16/image3.png" class>
+<p>3、导航页，记录配置的一些需要单点登录的地址信息。</p>
+<img src="/2021/06/22/16/image4.png" class>
+<p>4、配置导航信息，点击添加站点，在站点编辑内填写内容，如下面的visionstack的导航需要填写的信息，<br>kuboard就不需要填写站点账号和站点密码了，他是直接用的你当前登录的账号去校验的。</p>
+<img src="/2021/06/22/16/image5.png" class>
+<p>5、配置kuboard的站点信息，kuboard因为是ldap的认证方式，所以账号密码不需要输入。</p>
+<img src="/2021/06/22/16/image6.png" class>
+<p>6、添加完后就在站点导航生成来一个按钮，点击按钮跳转到对应服务去。</p>
+<img src="/2021/06/22/16/image7.png" class>
+<p>7、新增用户，DevOps用户组为初始化的时候添加的一个用户组，后续添加别的组可以在后台页面上的创建用户组中添加。</p>
+<img src="/2021/06/22/16/image8.png" class>
+
+<p>整个服务依赖的服务有 openldap、phpldapadmin、和dnsmasq（这个服务为dns服务）还有他本身sso_server服务<br>附：各个服务的启动命令，端口和地址用户密码等，根据实际情况修改。然后在kuboard的10080端口起服务，发现一个问题，<br>chrome浏览器新版本是不支持10080端口的，他认为该端口不安全需要你换一个，要不然你访问不了你的10080端口的服务。除非换浏览器。<a target="_blank" rel="noopener" href="https://www.yundongfang.com/Yun45338.html">https://www.yundongfang.com/Yun45338.html</a></p>
+<p>还有各个服务的节点的/etc/resolv.conf文件，添加dns服务器地址，该地址需要放在第一的位置</p>
+<pre>
+nameserver 10.0.80.54
+</pre>
+<p>然后如果是在虚拟机里面启动的，就需要修改/etc/resolv.conf把他锁定，不然重启服务器后新增的dns会被cloud-init重置。+i为锁定，-i为解锁</p>
+<pre>
+/usr/bin/chattr +i /etc/resolv.conf
+</pre>
+<p>最后如果dns配置于依赖服务之后的话，容器都需要重启下，让他获取最新的dns服务器地址。</p>
+<pre>
+# openldap
+docker run -p 389:389 \
+    --restart=unless-stopped \
+    --name openldap \
+    --network bridge \
+    --hostname openldap-host \
+    --env LDAP_ORGANISATION="zywx" \
+    --env LDAP_DOMAIN="zywx.com" \
+    --env LDAP_ADMIN_PASSWORD="vscloud" \
+    --detach osixia/openldap:1.5.0
+ 
+ 
+# phpldapadmin
+docker run -d \
+    --restart=unless-stopped \
+    --privileged -p 10004:80 \
+    --name phpldapadmin \
+    --env PHPLDAPADMIN_HTTPS=false \
+    --env PHPLDAPADMIN_LDAP_HOSTS=10.0.80.76 \
+    --detach osixia/phpldapadmin
+ 
+ 
+# sso_server
+docker run -d --restart=unless-stopped --name=sso_server -p 8008:8080 sso-server:1.0
+ 
+ 
+# kuboard
+docker run -d \
+    --restart=unless-stopped \
+    --name=kuboard \
+    -p 8090:80/tcp \
+    -p 10081:10081/udp \
+    -p 10081:10081/tcp \
+    -v /Users/shaohuanqing/temp/kuboard-data:/data \
+    -e KUBOARD_LOGIN_TYPE="ldap" \
+    -e KUBOARD_ENDPOINT="http://10.0.80.76:8090" \
+    -e KUBOARD_AGENT_SERVER_UDP_PORT="10081" \
+    -e KUBOARD_AGENT_SERVER_TCP_PORT="10081" \
+    -e KUBOARD_ROOT_USER="admin" \
+    -e LDAP_HOST="10.0.80.76:389" \
+    -e LDAP_BIND_DN="cn=admin,dc=zywx,dc=com" \
+    -e LDAP_BIND_PASSWORD="vscloud" \
+    -e LDAP_BASE_DN="dc=zywx,dc=com" \
+    -e LDAP_FILTER="(objectClass=posixAccount)" \
+    -e LDAP_ID_ATTRIBUTE="uid" \
+    -e LDAP_USER_NAME_ATTRIBUTE="uid" \
+    -e LDAP_EMAIL_ATTRIBUTE="mail" \
+    -e LDAP_DISPLAY_NAME_ATTRIBUTE="cn" \
+    -e LDAP_GROUP_SEARCH_BASE_DN="dc=zywx,dc=com" \
+    -e LDAP_GROUP_SEARCH_FILTER="(objectClass=posixGroup)" \
+    -e LDAP_USER_MACHER_USER_ATTRIBUTE="gidNumber" \
+    -e LDAP_USER_MACHER_GROUP_ATTRIBUTE="gidNumber" \
+    -e LDAP_GROUP_NAME_ATTRIBUTE="cn" \
+    eipwork/kuboard:v3.1.1.4
+ 
+ 
+# dnsmasq 这个dns服务如果已经有了的话就不需要了
+# 新建配置文件
+# mkdir -p /data/dns/
+# touch /data/dns/dnsmasq.conf
+# 启动后可以使用页面登录，端口为8080这个端口可以改，然后dns服务需要单独部署，不能和其他服务在一起，不然会导致路由混乱。
+docker run -d\
+    --name dnsmasq \
+    --restart always \
+    -p 53:53/udp \
+    -p 8080:8080 \
+    -v /data/dns/dnsmasq.conf:/etc/dnsmasq.conf \
+    --log-opt "max-size=100m" \
+    -e "HTTP_USER=admin" \
+    -e "HTTP_PASS=vscloud" \
+    jpillora/dnsmasq
+</pre>
 
     </div>
 
@@ -328,6 +432,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">名词解释：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89%E5%AE%9E%E7%8E%B0%E7%9C%9F%E6%AD%A3%E7%9A%84%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E5%8A%9F%E8%83%BD%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">为什么没有实现真正的单点登录功能？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E5%81%9A%E5%88%B0%E4%BB%80%E4%B9%88%E6%A0%B7%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">当前做到什么样？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">使用流程：</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
